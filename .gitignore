@@ -1,2 +1,5 @@
 mods
 test
+__pycache__
+mod_updater.log
+*.jar
