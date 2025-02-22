@@ -82,16 +82,19 @@ class ModrinthClient:
         """
         logging.info("Finding mods...")
         mods_list: List[Mod] = []
+        version: str = ""
 
         for hash in current_mod_hashes:
             logging.debug("Getting mod from hash: %s", hash)
             mod = self.get_mod_from_hash(hash)
             if not mod:
                 continue
+
+            old_version = mod[hash]["game_versions"][-1]
             mod_id = mod[hash]["project_id"]
             mod = self.get(f"/project/{mod_id}")
 
-            mod_dict = {
+            mod_dict: Mod = {
                 "id": mod["id"],
                 "slug": mod["slug"],
                 "title": mod["title"],
@@ -103,4 +106,17 @@ class ModrinthClient:
             mods_list.append(mod_dict)
             logging.info("Found: %s", mod["title"])
 
-        return mods_list
+        logging.info("Found %s mods.", len(mods_list))
+        return mods_list, old_version
+
+    def download_mods(self, mod_list: List[Mod], path: str, version: str) -> None:
+        """Download the mods from the list of mods.
+
+        :param mod_list: List of mods to download.
+        :type mod_list: List[Mod]
+        :param path: Path to download the mods.
+        :type str: str
+        :param version: Version of the game.
+        :type version: str
+        """
+        pass

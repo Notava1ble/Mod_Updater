@@ -66,3 +66,23 @@ def check_version(version: str, modrinthClient: ModrinthClient) -> str:
             return version
         logging.error("Version (%s) is not valid.", version)
         return sys.exit(1)
+
+
+def put_current_mods_in_folder(path: str, old_version: str) -> None:
+    """Move the current mods to the old version folder inside the specified path.
+
+    :param path: Path to the mods folder.
+    :type str: path
+    :param old_version: The old version of the mods.
+    :type old_version: str
+    """
+    old_path = os.path.join(path, old_version)
+    check_path(old_path)
+
+    files = os.listdir(path)
+
+    for file in files:
+        if file.endswith(".jar"):
+            os.rename(os.path.join(path, file), os.path.join(old_path, file))
+            logging.debug("Moved mod: %s to: %s verion folder", file, old_version)
+    logging.info("Moved current mods to %s version folder.", old_version)

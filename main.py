@@ -2,7 +2,12 @@ import requests, json, os, sys, logging
 from ModrinthClient import ModrinthClient
 from logging_config import configure_logger
 from parser import parse_args
-from utils import check_path, check_version, get_current_mod_hashes
+from utils import (
+    check_path,
+    check_version,
+    get_current_mod_hashes,
+    put_current_mods_in_folder,
+)
 
 modrinthClient = ModrinthClient()
 
@@ -17,7 +22,9 @@ def main():
     check_path(path)
 
     current_mod_hashes = get_current_mod_hashes(path)
-    mod_list = modrinthClient.create_mod_list(current_mod_hashes)
+    mod_list, old_version = modrinthClient.create_mod_list(current_mod_hashes)
+    put_current_mods_in_folder(path, old_version)
+    modrinthClient.download_mods(mod_list, path, version)
 
 
 if __name__ == "__main__":
