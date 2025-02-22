@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 from typing import List
@@ -51,36 +52,44 @@ class ModrinthClient:
 
         return False
 
-    def search(self, query: str) -> dict:
-        """search for mods on Modrinth
+    def get_mod_from_hash(self, file_hash: str) -> dict:
+        """Gets the mod from the hash of the file
 
-        :param query: search query
+        :param query: hash of the file
         :type query: str
-        :return: search results
+        :return: information about the mod
         :rtype: dict
         """
-        return self.get(
-            f"/search?limit=20&index=relevance&query={query}&facets=%5B%5B%22project_type%3Amod%22%5D%5D"
-        )["hits"]
+        response = requests.post(
+            f"{self.base_url}/version_files",
+            json={"hashes": [file_hash], "algorithm": "sha1"},
+        )
 
-    def create_mod_list(self, current_mods: List[str]) -> List[Mod]:
-        """Create a list of Mod Dicts from the current mods, searching in Modrinth.
+        if response.status_code == 200:
+            data = response.json()
+            return data  # Contains information about the mod
+        else:
+            logging.error("Error: %s %s", response.status_code, response.text)
+            return None
+
+    def create_mod_list(self, current_mod_hashes: List[str]) -> List[Mod]:
+        """Create a list of Mod Dicts from the current mods, using the hash of the files.
 
         :param current_mods: List of current mods in the folder.
         :type current_mods: List[str]
         :return: List of Mod Dicts.
         :rtype: List[Mod]
         """
+        logging.info("Finding mods...")
         mods_list: List[Mod] = []
 
-        for mod in current_mods:
-            logging.debug("Searching for: %s", mod)
-            search = self.search(mod)
-            if not search:
-                logging.error("No mods found with search: %s", mod)
+        for hash in current_mod_hashes:
+            logging.debug("Getting mod from hash: %s", hash)
+            mod = self.get_mod_from_hash(hash)
+            if not mod:
                 continue
-            mod_slug = search[0]["slug"]
-            mod = self.get(f"/project/{mod_slug}")
+            mod_id = mod[hash]["project_id"]
+            mod = self.get(f"/project/{mod_id}")
 
             mod_dict = {
                 "id": mod["id"],

@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import os
 import sys
@@ -7,7 +8,7 @@ from ModrinthClient import ModrinthClient
 from models.models import Mod
 
 
-def get_current_mod_names(path: str) -> List[str]:
+def get_current_mod_hashes(path: str) -> List[str]:
     """Get all the mods names in the specified path.
 
     :param path: Path to the mods folder.
@@ -21,7 +22,12 @@ def get_current_mod_names(path: str) -> List[str]:
 
     for file in files:
         if file.endswith(".jar"):
-            mods.append(file)
+            sha1 = hashlib.sha1()  # You can use hashlib.md5() for MD5
+            with open(os.path.join(path, file), "rb") as f:
+                while chunk := f.read(8192):
+                    sha1.update(chunk)
+            hash = sha1.hexdigest()
+            mods.append(hash)
 
     logging.debug("Current mods: %s", mods)
     return mods
