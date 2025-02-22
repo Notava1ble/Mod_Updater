@@ -2,25 +2,22 @@ import requests, json, os, sys, logging
 from ModrinthClient import ModrinthClient
 from logging_config import configure_logger
 from parser import parse_args
-from utils import check_path, get_current_mod_names
+from utils import check_path, check_version, get_current_mod_names
 
 modrinthClient = ModrinthClient()
 
 
 def main():
     args = parse_args()
-    vesrion = (
-        args.version
-        if args.version != "latest"
-        else modrinthClient.latest_release_version()
-    )
+    version = check_version(args.version, modrinthClient)
     path = args.path
 
-    logging.info("Started with version: (%s) and path: (%s)", vesrion, path)
+    logging.info("Started with version: (%s) and path: (%s)", version, path)
 
     check_path(path)
 
     current_mods = get_current_mod_names(path)
+    mod_list = modrinthClient.create_mod_list(current_mods)
 
 
 if __name__ == "__main__":

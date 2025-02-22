@@ -8,6 +8,7 @@ def parse_args():
         "--path",
         default="./mods/",
         required=False,
+        type=str,
         help="Path where to update mods(default: appdata/roaming/.minecraft/mods).",
     )
     parser.add_argument(
@@ -15,6 +16,7 @@ def parse_args():
         "--version",
         default="latest",
         required=False,
+        type=str,
         help="The version of the mod to download. Example: 1.21.1 (default: latest)",
     )
     return parser.parse_args()
