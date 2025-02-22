@@ -1,6 +1,6 @@
 # Minecraft Mod Updater
 
-A Command Line Tool to automatically update all minecraft mods in a folder, using the modrinth api
+A Command Line Tool to automatically update all minecraft mods in a folder, using the Modrinth API.
 
 ## Requirements
 
@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-To update your Minecraft mods, run the following command in your terminal. It will look for a mods folder where the script itself is located.
+To update your Minecraft mods, run the following command in your terminal. It will look for a mods folder where the script itself is located. The old mods will be put in a folder named after the version they are.
 
 ```terminal
 python main.py
