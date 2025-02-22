@@ -2,23 +2,24 @@ import hashlib
 import logging
 import os
 import sys
-from typing import List
+from typing import TYPE_CHECKING, Dict
+
 
 from ModrinthClient import ModrinthClient
 from models.models import Mod
 
 
-def get_current_mod_hashes(path: str) -> List[str]:
+def get_current_mod_hashes(path: str) -> Dict[str, str]:
     """Get all the mods names in the specified path.
 
     :param path: Path to the mods folder.
     :type path: str
-    :return: List of mod names.
-    :rtype: List[str]
+    :return: Dictionary with the mods names and their hashes.
+    :rtype: Dict[str: str]
     """
     files = os.listdir(path)
 
-    mods = []
+    mods = {}
 
     for file in files:
         if file.endswith(".jar"):
@@ -27,7 +28,7 @@ def get_current_mod_hashes(path: str) -> List[str]:
                 while chunk := f.read(8192):
                     sha1.update(chunk)
             hash = sha1.hexdigest()
-            mods.append(hash)
+            mods[file] = hash
 
     logging.debug("Current mods: %s", mods)
     return mods

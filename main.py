@@ -1,4 +1,5 @@
-import requests, json, os, sys, logging
+import logging
+
 from ModrinthClient import ModrinthClient
 from logging_config import configure_logger
 from parser import parse_args
@@ -24,7 +25,7 @@ def main():
     current_mod_hashes = get_current_mod_hashes(path)
     mod_list, old_version = modrinthClient.create_mod_list(current_mod_hashes)
     put_current_mods_in_folder(path, old_version)
-    modrinthClient.download_mods(mod_list, path, version)
+    modrinthClient.download_mods(mod_list, path, version, "fabric")
 
 
 if __name__ == "__main__":

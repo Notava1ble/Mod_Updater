@@ -1,7 +1,7 @@
-import hashlib
 import json
 import logging
-from typing import List
+import os
+from typing import Dict, List
 import requests
 
 from models.models import GameVersion, Mod
@@ -26,6 +26,30 @@ class ModrinthClient:
         except requests.exceptions.RequestException as e:
             logging.error(f"Network error: {e}")
             return None
+
+    def download_mod(
+        self, url: str, path: str, filename: str
+    ) -> bool | requests.Response:
+        """Download the mod from the url
+
+        :param url: url of the mod
+        :type url: str
+        :param path: path to download the mod
+        :type path: str
+        :param filename: name of the file to save
+        :type filename: str
+        :return: True if the mod was downloaded successfully
+        :rtype: bool
+        """
+        response = requests.get(url, stream=True)
+
+        if response.status_code == 200:
+            with open(os.path.join(path, filename), "wb") as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    file.write(chunk)
+            return True, "placeholder"
+        else:
+            return False, response
 
     def latest_release_version(self) -> str:
         """get the latest release version of the game
@@ -52,6 +76,16 @@ class ModrinthClient:
 
         return False
 
+    def get_mod_version(self, mod_id: str) -> dict:
+        """Get the version of the mod
+
+        :param mod_id: id of the mod
+        :type mod_id: str
+        :return: version of the mod
+        :rtype: dict
+        """
+        return self.get(f"/project/{mod_id}/version")
+
     def get_mod_from_hash(self, file_hash: str) -> dict:
         """Gets the mod from the hash of the file
 
@@ -72,25 +106,26 @@ class ModrinthClient:
             logging.error("Error: %s %s", response.status_code, response.text)
             return None
 
-    def create_mod_list(self, current_mod_hashes: List[str]) -> List[Mod]:
+    def create_mod_list(self, current_mod_hashes: Dict[str, str]) -> List[Mod]:
         """Create a list of Mod Dicts from the current mods, using the hash of the files.
 
-        :param current_mods: List of current mods in the folder.
-        :type current_mods: List[str]
+        :param current_mods: A dictionary of the current mods hashes with the file name as the key.
+        :type current_mods: Dict[str, str]
         :return: List of Mod Dicts.
         :rtype: List[Mod]
         """
         logging.info("Finding mods...")
         mods_list: List[Mod] = []
-        version: str = ""
+        old_version: str = ""
 
-        for hash in current_mod_hashes:
+        for index, (filename, hash) in enumerate(current_mod_hashes.items()):
             logging.debug("Getting mod from hash: %s", hash)
             mod = self.get_mod_from_hash(hash)
             if not mod:
+                logging.error("Mod not found: %s", filename)
                 continue
-
-            old_version = mod[hash]["game_versions"][-1]
+            if not old_version:
+                old_version = mod[hash]["game_versions"][-1]
             mod_id = mod[hash]["project_id"]
             mod = self.get(f"/project/{mod_id}")
 
@@ -109,7 +144,41 @@ class ModrinthClient:
         logging.info("Found %s mods.", len(mods_list))
         return mods_list, old_version
 
-    def download_mods(self, mod_list: List[Mod], path: str, version: str) -> None:
+    def get_latest_version(self, mod: Mod, version: str, loader: str) -> str:
+        """Get the latest version of the mod compatible with the specified version and loader.
+
+        :param mod_id: The mod dict.
+        :type mod_id: Mod
+        :param version: The version of the game.
+        :type version: str
+        :param loader: The mod loader.
+        :type loader: str
+        :return: The latest version of the mod.
+        :rtype: str
+        """
+        mod_id = mod["id"]
+        mod_name = mod["title"]
+
+        mod_versions_data = self.get_mod_version(mod_id)
+
+        filtered_mod_versions_data = [
+            mod_version
+            for mod_version in mod_versions_data
+            if version in mod_version["game_versions"]
+            and loader in mod_version["loaders"]
+        ]
+
+        if not filtered_mod_versions_data:
+            logging.error(
+                f"No version found for {mod_name} with MC_VERSION={version} and LOADER={loader}"
+            )
+            return None
+
+        return filtered_mod_versions_data[0]["files"][0]
+
+    def download_mods(
+        self, mod_list: List[Mod], path: str, version: str, loader: str
+    ) -> None:
         """Download the mods from the list of mods.
 
         :param mod_list: List of mods to download.
@@ -118,5 +187,26 @@ class ModrinthClient:
         :type str: str
         :param version: Version of the game.
         :type version: str
+        :param loader: The mod loader.
+        :type loader: str
         """
-        pass
+        logging.info("Downloading mods...")
+        for mod in mod_list:
+            latest_version_file = self.get_latest_version(mod, version, loader)
+            if not latest_version_file:
+                continue
+            response = self.download_mod(
+                latest_version_file["url"], path, latest_version_file["filename"]
+            )
+            if response[0]:
+                logging.info("Downloaded: %s", mod["title"])
+
+            else:
+                logging.error(
+                    "Error downloading mod %s: %s %s",
+                    mod["title"],
+                    response.status_code,
+                    response.text,
+                )
+
+        logging.info("Downloaded %s mods.", len(mod_list))
