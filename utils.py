@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Dict
 
 
 from ModrinthClient import ModrinthClient
-from models.models import Mod
 
 
 def get_current_mod_hashes(path: str) -> Dict[str, str]:

@@ -191,6 +191,7 @@ class ModrinthClient:
         :type loader: str
         """
         logging.info("Downloading mods...")
+        count = 0
         for mod in mod_list:
             latest_version_file = self.get_latest_version(mod, version, loader)
             if not latest_version_file:
@@ -200,6 +201,7 @@ class ModrinthClient:
             )
             if response[0]:
                 logging.info("Downloaded: %s", mod["title"])
+                count += 1
 
             else:
                 logging.error(
@@ -209,4 +211,4 @@ class ModrinthClient:
                     response.text,
                 )
 
-        logging.info("Downloaded %s mods.", len(mod_list))
+        logging.info("Downloaded %s mods.", count)

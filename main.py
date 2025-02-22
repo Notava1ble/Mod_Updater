@@ -17,6 +17,7 @@ def main():
     args = parse_args()
     version = check_version(args.version, modrinthClient)
     path = args.path
+    loader = args.loader
 
     logging.info("Started with version: (%s) and path: (%s)", version, path)
 
@@ -25,7 +26,7 @@ def main():
     current_mod_hashes = get_current_mod_hashes(path)
     mod_list, old_version = modrinthClient.create_mod_list(current_mod_hashes)
     put_current_mods_in_folder(path, old_version)
-    modrinthClient.download_mods(mod_list, path, version, "fabric")
+    modrinthClient.download_mods(mod_list, path, version, loader)
 
 
 if __name__ == "__main__":
