@@ -1,20 +1,37 @@
-import argparse
+import logging
+import os
+from typing import List
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Update mods from Modrinth.")
-    parser.add_argument(
-        "-p",
-        "--path",
-        default="./mods/",
-        required=False,
-        help="Path where to update mods(default: appdata/roaming/.minecraft/mods).",
-    )
-    parser.add_argument(
-        "-v",
-        "--version",
-        default="latest",
-        required=False,
-        help="The version of the mod to download. Example: 1.21.1 (default: latest)",
-    )
-    return parser.parse_args()
+def get_current_mod_names(path: str) -> List[str]:
+    """Get all the mods names in the specified path.
+
+    :param path: Path to the mods folder.
+    :type path: str
+    :return: List of mod names.
+    :rtype: List[str]
+    """
+    files = os.listdir(path)
+
+    mods = []
+
+    for file in files:
+        if file.endswith(".jar"):
+            mods.append(file)
+
+    logging.debug("Current mods: %s", mods)
+    return mods
+
+
+def check_path(path: str) -> None:
+    """Check if the specified path exists, if not create it.
+
+    :param path: Path to check.
+    :type path: str
+    """
+    logging.debug("Checking path: %s", path)
+    if not os.path.exists(path):
+        os.makedirs(path)
+        logging.info("Created path: %s", path)
+    else:
+        logging.debug("Path exists: %s", path)

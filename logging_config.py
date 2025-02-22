@@ -2,7 +2,7 @@ import logging
 import sys
 
 
-def configure_logger(log_file: str = None, debug: bool = False):
+def configure_logger(log_file: str = "Mod_updater.log", debug: bool = False):
     """
     Configures and returns a logger with console and optional file logging.
 
@@ -18,9 +18,12 @@ def configure_logger(log_file: str = None, debug: bool = False):
     file_handler.setFormatter(formatter)
 
     logger = logging.getLogger()
-    if debug:
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-    logger.setLevel(level=logging.DEBUG if debug else logging.INFO)
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_formatter = logging.Formatter("%(levelname)s - %(message)s")
+    console_handler.setFormatter(console_formatter)
+    console_handler.setLevel(logging.DEBUG if debug else logging.INFO)
+
+    logger.addHandler(console_handler)
+    logger.setLevel(level=logging.DEBUG)
     logger.addHandler(file_handler)
