@@ -13,7 +13,7 @@ class ModrinthClient:
         self.game_versions: List[GameVersion] = self.get("/tag/game_version")
 
     def get(self, url: str) -> list | dict | None:
-        """get data from the specified url extention of https://api.modrinth.com/v2
+        """Get data from the specified url extention of https://api.modrinth.com/v2
 
         :param url: url extention
         :type url: str
@@ -32,7 +32,7 @@ class ModrinthClient:
     def download_mod(
         self, url: str, path: str, filename: str
     ) -> bool | requests.Response:
-        """Download the mod from the url
+        """Download the mod using the url
 
         :param url: url of the mod
         :type url: str
@@ -79,7 +79,7 @@ class ModrinthClient:
         return False
 
     def get_old_version(self, mods_hashes: List[str]) -> str:
-        """Get the old version of the mods.
+        """Gets the version of the current mods
 
         :param mods_hashes: The current mods hashes.
         :type mods_hashes: List[str]
@@ -102,7 +102,7 @@ class ModrinthClient:
     def download_mods(
         self, mod_hashes: Dict[str, str], path: str, version: str, loader: str
     ) -> None:
-        """Download the mods from the list of mods.
+        """Download the mods using the dictionary of mod hashes.
 
         :param mod_list: Dictionary of mod_hashes as keys and filenames as values.
         :type mod_list: Dict[str, str]
@@ -130,8 +130,10 @@ class ModrinthClient:
         for hash, filename in mod_hashes.items():
             if hash not in latest_versions.keys():
                 logging.error(
-                    "Mod (%s) does not exist in modrinth servers. You probably haven't downloaded it from Modrinth.",
+                    "Mod (%s) does not exist in modrinth servers. You probably haven't downloaded it from Modrinth or the mod doesnt support version %s for %s.",
                     filename,
+                    version,
+                    loader,
                 )
                 continue
             ver = latest_versions[hash]
