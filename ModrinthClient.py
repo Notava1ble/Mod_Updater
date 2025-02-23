@@ -76,16 +76,25 @@ class ModrinthClient:
 
         return False
 
-    def get_mod_from_hash(self, hash: str) -> Mod:
-        """Get the mod dict from a hash
+    def get_mod_from_hash(self, file_hash: str) -> dict:
+        """Gets the mod from the hash of the file
 
-        :param hash: The hash of the mod file
-        :type hash: str
-        :return: The mod dict
-        :rtype: Mod
+        :param query: hash of the file
+        :type query: str
+        :return: information about the mod
+        :rtype: dict
         """
-        # TODO
-        return self.get("")
+        response = requests.post(
+            f"{self.base_url}/version_files",
+            json={"hashes": [file_hash], "algorithm": "sha1"},
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            return data  # Contains information about the mod
+        else:
+            logging.error("Error: %s %s", response.status_code, response.text)
+            return None
 
     def get_old_version(self, mods_hashes: List[str]) -> str:
         """Get the old version of the mods.
@@ -135,13 +144,12 @@ class ModrinthClient:
             },
         ).json()
 
-        print(json.dumps(latest_versions, indent=2))
-
         for hash, ver in latest_versions.items():
             name = ver["files"][0]["filename"]
             resp = self.download_mod(ver["files"][0]["url"], path=path, filename=name)
             if resp[0]:
-                logging.info("Downloaded: %s", name)
+                count += 1
+                logging.info("%s Downloaded: %s", count, name)
             else:
                 logging.error("Failed to downlaod: %s", name)
 
