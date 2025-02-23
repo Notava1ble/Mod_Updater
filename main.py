@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from ModrinthClient import ModrinthClient
 from logging_config import configure_logger
@@ -23,10 +24,11 @@ def main():
 
     check_path(path)
 
-    current_mod_hashes = get_current_mod_hashes(path)
-    mod_list, old_version = modrinthClient.create_mod_list(current_mod_hashes)
-    put_current_mods_in_folder(path, old_version)
-    modrinthClient.download_mods(mod_list, path, version, loader)
+    mod_hashes: List[str] = get_current_mod_hashes(path)
+
+    put_current_mods_in_folder(path, modrinthClient.get_old_version(mod_hashes))
+
+    modrinthClient.download_mods(mod_hashes, path, version, loader)
 
 
 if __name__ == "__main__":

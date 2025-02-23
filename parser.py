@@ -2,14 +2,14 @@ import argparse
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Update mods from Modrinth.")
+    parser = argparse.ArgumentParser(description="Update mods using the Modrinth API.")
     parser.add_argument(
         "-p",
         "--path",
         default="./mods/",
         required=False,
         type=str,
-        help="Path where to update mods(default: appdata/roaming/.minecraft/mods).",
+        help="Path where to update mods(default: ./mods/).",
     )
     parser.add_argument(
         "-v",
