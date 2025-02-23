@@ -1,6 +1,6 @@
 # Minecraft Mod Updater
 
-A Command Line Tool to automatically update all minecraft mods in a folder, using the Modrinth API.
+A simple and barebones Command Line Tool to automatically update all minecraft mods in a folder, using the Modrinth API.
 
 ## Requirements
 
