@@ -100,12 +100,12 @@ class ModrinthClient:
         return old_version
 
     def download_mods(
-        self, mod_hashes: List[str], path: str, version: str, loader: str
+        self, mod_hashes: Dict[str, str], path: str, version: str, loader: str
     ) -> None:
         """Download the mods from the list of mods.
 
-        :param mod_list: List of mod_hashes.
-        :type mod_list: List[str]
+        :param mod_list: Dictionary of mod_hashes as keys and filenames as values.
+        :type mod_list: Dict[str, str]
         :param path: Path to download the mods.
         :type str: str
         :param version: Version of the game.
@@ -115,18 +115,26 @@ class ModrinthClient:
         """
         logging.info("Downloading mods...")
         count = 0
+        mod_hashes_list = [*mod_hashes]
 
         latest_versions: dict = requests.post(
             "https://api.modrinth.com/v2/version_files/update",
             json={
-                "hashes": mod_hashes,
+                "hashes": mod_hashes_list,
                 "algorithm": "sha1",
                 "loaders": [loader],
                 "game_versions": [version],
             },
         ).json()
 
-        for hash, ver in latest_versions.items():
+        for hash, filename in mod_hashes.items():
+            if hash not in latest_versions.keys():
+                logging.error(
+                    "Mod (%s) does not exist in modrinth servers. You probably haven't downloaded it from Modrinth.",
+                    filename,
+                )
+                continue
+            ver = latest_versions[hash]
             mod: Mod = self.get(f"/project/{ver["project_id"]}")
             filename = ver["files"][0]["filename"]
 

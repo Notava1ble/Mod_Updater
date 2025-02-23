@@ -8,17 +8,17 @@ from typing import TYPE_CHECKING, Dict, List
 from ModrinthClient import ModrinthClient
 
 
-def get_current_mod_hashes(path: str) -> List[str]:
+def get_current_mod_hashes(path: str) -> Dict[str, str]:
     """Get all the mods names in the specified path.
 
     :param path: Path to the mods folder.
     :type path: str
-    :return: List with the mod hashes.
-    :rtype: List[str]
+    :return: Dict with the mod hashes as keys and filename as value.
+    :rtype: Dict[str, str]
     """
     files = os.listdir(path)
 
-    hashes = []
+    hashes = {}
 
     for file in files:
         if file.endswith(".jar"):
@@ -27,7 +27,7 @@ def get_current_mod_hashes(path: str) -> List[str]:
                 while chunk := f.read(8192):
                     sha1.update(chunk)
             hash = sha1.hexdigest()
-            hashes.append(hash)
+            hashes[hash] = file
 
     logging.debug("Current hashes: %s", hashes)
     return hashes

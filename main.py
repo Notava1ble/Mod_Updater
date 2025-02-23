@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import Dict, List
 
 from ModrinthClient import ModrinthClient
 from logging_config import configure_logger
@@ -24,9 +24,9 @@ def main():
 
     check_path(path)
 
-    mod_hashes: List[str] = get_current_mod_hashes(path)
+    mod_hashes: Dict[str, str] = get_current_mod_hashes(path)
 
-    put_current_mods_in_folder(path, modrinthClient.get_old_version(mod_hashes))
+    put_current_mods_in_folder(path, modrinthClient.get_old_version([*mod_hashes]))
 
     modrinthClient.download_mods(mod_hashes, path, version, loader)
 
