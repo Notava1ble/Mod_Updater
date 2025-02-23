@@ -76,6 +76,17 @@ class ModrinthClient:
 
         return False
 
+    def get_mod_from_hash(self, hash: str) -> Mod:
+        """Get the mod dict from a hash
+
+        :param hash: The hash of the mod file
+        :type hash: str
+        :return: The mod dict
+        :rtype: Mod
+        """
+        # TODO
+        return self.get("")
+
     def get_old_version(self, mods_hashes: List[str]) -> str:
         """Get the old version of the mods.
 
@@ -87,7 +98,7 @@ class ModrinthClient:
         logging.info("Getting old version...")
         old_version = ""
         for hash in mods_hashes:
-            mod = self.get_mod_from_hash(hash)
+            mod: Mod = self.get_mod_from_hash(hash)
             if not mod:
                 continue
             if not old_version:
