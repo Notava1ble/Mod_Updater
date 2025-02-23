@@ -44,7 +44,7 @@ python main.py -p [absolute_path_to_your_mods_folder]
 
 ## Examples
 
-Update mods in the default mods folder:
+Update mods to the latest game version in the default mods folder for minecraft:
 
 ```terminal
 python main.py -p "C:\Users\your_name\AppData\Roaming\.minecraft\mods"

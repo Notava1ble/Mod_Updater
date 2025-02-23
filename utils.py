@@ -2,7 +2,7 @@ import hashlib
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List
 
 
 from ModrinthClient import ModrinthClient
@@ -13,12 +13,12 @@ def get_current_mod_hashes(path: str) -> Dict[str, str]:
 
     :param path: Path to the mods folder.
     :type path: str
-    :return: Dictionary with the mods names and their hashes.
-    :rtype: Dict[str: str]
+    :return: Dict with the mod hashes as keys and filename as value.
+    :rtype: Dict[str, str]
     """
     files = os.listdir(path)
 
-    mods = {}
+    hashes = {}
 
     for file in files:
         if file.endswith(".jar"):
@@ -27,10 +27,10 @@ def get_current_mod_hashes(path: str) -> Dict[str, str]:
                 while chunk := f.read(8192):
                     sha1.update(chunk)
             hash = sha1.hexdigest()
-            mods[file] = hash
+            hashes[hash] = file
 
-    logging.debug("Current mods: %s", mods)
-    return mods
+    logging.debug("Current hashes: %s", hashes)
+    return hashes
 
 
 def check_path(path: str) -> None:
@@ -84,5 +84,5 @@ def put_current_mods_in_folder(path: str, old_version: str) -> None:
     for file in files:
         if file.endswith(".jar"):
             os.rename(os.path.join(path, file), os.path.join(old_path, file))
-            logging.debug("Moved mod: %s to: %s verion folder", file, old_version)
+            logging.debug("Moved mod: %s to: %s version folder", file, old_version)
     logging.info("Moved current mods to %s version folder.", old_version)
