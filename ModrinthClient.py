@@ -22,6 +22,8 @@ class ModrinthClient:
         """
         try:
             response = requests.get(self.base_url + url)
+            if response.status_code == 404:
+                return None
             return json.loads(response.text)
         except requests.exceptions.RequestException as e:
             logging.error(f"Network error: {e}")
@@ -44,7 +46,7 @@ class ModrinthClient:
         response = requests.get(url, stream=True)
 
         if response.status_code == 200:
-            with open(f"{os.path.join(path, filename)}.jar", "wb") as file:
+            with open(os.path.join(path, filename), "wb") as file:
                 for chunk in response.iter_content(chunk_size=8192):
                     file.write(chunk)
             return True, "placeholder"
@@ -76,26 +78,6 @@ class ModrinthClient:
 
         return False
 
-    def get_mod_from_hash(self, file_hash: str) -> dict:
-        """Gets the mod from the hash of the file
-
-        :param query: hash of the file
-        :type query: str
-        :return: information about the mod
-        :rtype: dict
-        """
-        response = requests.post(
-            f"{self.base_url}/version_files",
-            json={"hashes": [file_hash], "algorithm": "sha1"},
-        )
-
-        if response.status_code == 200:
-            data = response.json()
-            return data  # Contains information about the mod
-        else:
-            logging.error("Error: %s %s", response.status_code, response.text)
-            return None
-
     def get_old_version(self, mods_hashes: List[str]) -> str:
         """Get the old version of the mods.
 
@@ -107,11 +89,11 @@ class ModrinthClient:
         logging.info("Getting old version...")
         old_version = ""
         for hash in mods_hashes:
-            mod: Mod = self.get_mod_from_hash(hash)
+            mod: Mod = self.get(f"/version_file/{hash}")
             if not mod:
                 continue
             if not old_version:
-                old_version = mod[hash]["game_versions"][-1]
+                old_version = mod["game_versions"][-1]
                 break
 
         logging.info("Old version: %s", old_version)
@@ -145,12 +127,21 @@ class ModrinthClient:
         ).json()
 
         for hash, ver in latest_versions.items():
-            name = ver["files"][0]["filename"]
-            resp = self.download_mod(ver["files"][0]["url"], path=path, filename=name)
+            mod: Mod = self.get(f"/project/{ver["project_id"]}")
+            filename = ver["files"][0]["filename"]
+
+            if mod:
+                title = mod["title"]
+            else:
+                title = filename
+
+            logging.info("Downloading: %s", title)
+            resp = self.download_mod(
+                ver["files"][0]["url"], path=path, filename=filename
+            )
             if resp[0]:
                 count += 1
-                logging.info("%s Downloaded: %s", count, name)
             else:
-                logging.error("Failed to downlaod: %s", name)
+                logging.error("Failed to downlaod: %s", title)
 
         logging.info("Downloaded %s mods.", count)
