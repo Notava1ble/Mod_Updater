@@ -59,7 +59,3 @@ python main.py -v 1.20 -l forge
 ## Contributing and Issues
 
 If you encounter a bug, open an issue in the issues tab. You're welcome to contribute!
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
