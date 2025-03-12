@@ -16,7 +16,7 @@ Otherwise, if you want even more control, or don't want to run random executable
 1. Clone this repository using git, or download the files:
 
 ```terminal
-git clone https://github.com/username/MinecraftModUpdater.git
+git clone https://github.com/Notava1ble/Mod_Updater.git
 ```
 
 2. Navigate to the project folder, and open the terminal there:
